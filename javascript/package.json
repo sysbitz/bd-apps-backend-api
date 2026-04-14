@@ -1,0 +1,19 @@
+{
+  "name": "bdapps-sdk-javascript",
+  "version": "1.0.0",
+  "description": "BDApps API SDK for JavaScript - SMS, USSD, CAAS, OTP, Subscription services",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "client": "node client.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.0",
+    "express": "^4.21.0"
+  },
+  "keywords": ["bdapps", "sms", "ussd", "caas", "otp"],
+  "license": "ISC"
+}
