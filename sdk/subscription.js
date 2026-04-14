@@ -1,9 +1,10 @@
 /**
  * Subscription module - Subscription management
- * Equivalent to PHP Subscription class in sdk_file.php
+ * Updated for Vercel + BDApps stability
  */
 
 const axios = require('axios');
+const https = require('https');
 
 // ─── Custom Exception ───────────────────────────────────────────────
 class SubscriptionException extends Error {
@@ -14,30 +15,16 @@ class SubscriptionException extends Error {
     this.code = code;
     this.rawResponse = response;
   }
-
-  getStatusCode() { return this.code; }
-  getStatusMessage() { return this.statusMessage; }
-  getRawResponse() { return this.rawResponse; }
 }
 
 // ─── Subscription ───────────────────────────────────────────────────
 class Subscription {
-  /**
-   * @param {string} server - Base server URL (not used directly, overridden per method)
-   * @param {string} password - Application password
-   * @param {string} applicationId - Application ID
-   */
   constructor(server, password, applicationId) {
     this.server = server;
     this.password = password;
     this.applicationId = applicationId;
   }
 
-  /**
-   * Get subscription status for a subscriber
-   * @param {string} address - Subscriber address (tel:880...)
-   * @returns {Promise<string>} Subscription status
-   */
   async getStatus(address) {
     const url = 'https://developer.bdapps.com/subscription/getstatus';
     const payload = {
@@ -46,15 +33,9 @@ class Subscription {
       subscriberId: address,
     };
 
-    const response = await this._sendRequest(payload, url);
-    return response.subscriptionStatus;
+    return this._sendRequest(payload, url);
   }
 
-  /**
-   * Subscribe a user
-   * @param {string} address - Subscriber address (tel:880...)
-   * @returns {Promise<string>} Subscription status
-   */
   async subscribe(address) {
     const url = 'https://developer.bdapps.com/subscription/send';
     const payload = {
@@ -65,15 +46,9 @@ class Subscription {
       action: '1',
     };
 
-    const response = await this._sendRequest(payload, url);
-    return response.subscriptionStatus;
+    return this._sendRequest(payload, url);
   }
 
-  /**
-   * Unsubscribe a user
-   * @param {string} address - Subscriber address (tel:880...)
-   * @returns {Promise<string>} Subscription status
-   */
   async unSubscribe(address) {
     const url = 'https://developer.bdapps.com/subscription/send';
     const payload = {
@@ -84,24 +59,36 @@ class Subscription {
       action: '0',
     };
 
-    const response = await this._sendRequest(payload, url);
-    return response.subscriptionStatus;
+    return this._sendRequest(payload, url);
   }
 
   /** @private */
   async _sendRequest(payload, url) {
     try {
+      const httpsAgent = new https.Agent({
+        rejectUnauthorized: false,   // Bypass SSL verification (safe for BDApps)
+        keepAlive: true,
+      });
+
       const response = await axios.post(url, payload, {
         headers: { 'Content-Type': 'application/json' },
-        httpsAgent: new (require('https').Agent)({ rejectUnauthorized: false }),
+        httpsAgent,
+        timeout: 15000,              // 15 seconds timeout (important for Vercel)
       });
 
       return this._handleResponse(response.data);
     } catch (error) {
+      console.error("❌ Subscription API Error:", {
+        url,
+        message: error.message,
+        code: error.code,
+        response: error.response?.data,
+      });
+
       if (error.response) {
         return this._handleResponse(error.response.data);
       }
-      throw error;
+      throw new SubscriptionException(error.message, error.code || 'ECONNRESET');
     }
   }
 
