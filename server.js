@@ -28,8 +28,8 @@ const PORT = process.env.PORT || 3000;
 const BASE_URL = process.env.BDAPPS_BASE_URL || 'https://developer.bdapps.com';
 const APP_ID = process.env.BDAPPS_APP_ID || '';
 const PASSWORD = process.env.BDAPPS_PASSWORD || '';
-const SP_APP_ID = process.env.BDAPPS_SERVICE_PROVIDER_APP_ID || 'DSAPP_000003';
-const HASH_SECRET = process.env.BDAPPS_HASH_SECRET || '';
+const SP_APP_ID = process.env.BDAPPS_SERVICE_PROVIDER_APP_ID || '';
+const HASH_SECRET = process.env.BDAPPS_API_SECRET_KEY || "";
 
 const logger = new Logger();
 

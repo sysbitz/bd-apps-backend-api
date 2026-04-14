@@ -27,7 +27,7 @@ class OTPService {
     // Format mobile number with tel:88 prefix
     const subscriberId = userMobile.startsWith('tel:')
       ? userMobile
-      : `tel:88${userMobile}`;
+      : `tel: 88${userMobile}`;
 
     const requestData = {
       applicationId: this.applicationId,
